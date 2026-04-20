@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AM05 TECH — لوحة التحكم</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#020510;--card:rgba(8,18,38,0.9);
+  --blue:#3b82f6;--blue-b:#60a5fa;
+  --green:#22c55e;--yellow:#f59e0b;--red:#ef4444;
+  --text:#f0f4ff;--sub:#94a3b8;--muted:#475569;
+  --border:rgba(255,255,255,0.07);
+}
+body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* ── ORBS ── */
+.orbs{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.08;animation:orbF linear infinite}
+.orb-1{width:500px;height:500px;background:radial-gradient(circle,#3b82f6,transparent);top:-5%;right:-5%;animation-duration:20s}
+.orb-2{width:400px;height:400px;background:radial-gradient(circle,#a78bfa,transparent);bottom:-5%;left:-5%;animation-duration:25s;animation-delay:-10s}
+@keyframes orbF{0%,100%{transform:translateY(0)}50%{transform:translateY(-30px)}}
+
+/* ── LAYOUT ── */
+.layout{display:flex;min-height:100vh;position:relative;z-index:1}
+.sidebar{width:220px;flex-shrink:0;background:rgba(4,12,28,.95);border-left:1px solid var(--border);padding:1.25rem .875rem;display:flex;flex-direction:column}
+.main{flex:1;padding:1.75rem;overflow-x:hidden}
+
+/* ── SIDEBAR ── */
+.sb-brand{padding:.5rem .5rem 1.25rem;border-bottom:1px solid var(--border);margin-bottom:1rem}
+.sb-logo{font-size:1rem;font-weight:900;color:var(--blue-b);display:flex;align-items:center;gap:.5rem}
+.sb-sub{font-size:.65rem;color:var(--muted);margin-top:.2rem}
+.nav-item{display:flex;align-items:center;gap:.6rem;padding:.6rem .75rem;border-radius:.6rem;font-size:.83rem;font-weight:700;color:var(--muted);text-decoration:none;transition:all .2s;margin-bottom:.2rem}
+.nav-item:hover,.nav-item.active{background:rgba(59,130,246,.1);color:var(--blue-b)}
+.sb-footer{margin-top:auto;padding-top:1rem;border-top:1px solid var(--border)}
+.conn{display:flex;align-items:center;gap:.5rem;font-size:.7rem;font-weight:600;color:var(--muted)}
+.conn-dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:blink 1s step-end infinite;flex-shrink:0}
+.conn-dot.off{background:var(--red);animation:none}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* ── TOP ── */
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem}
+.page-title{font-size:1.3rem;font-weight:900}
+.live-pill{display:flex;align-items:center;gap:.4rem;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);color:var(--green);font-size:.72rem;font-weight:700;padding:.3rem .8rem;border-radius:999px}
+
+/* ── STATS ── */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin-bottom:1.5rem}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:.875rem;padding:1rem 1.25rem;position:relative;overflow:hidden;transition:transform .2s}
+.stat:hover{transform:translateY(-2px)}
+.stat::before{content:'';position:absolute;top:0;right:0;width:3px;height:100%;border-radius:0 .875rem .875rem 0}
+.stat.blue::before{background:var(--blue)}
+.stat.green::before{background:var(--green)}
+.stat.yellow::before{background:var(--yellow)}
+.stat-icon{font-size:1.3rem;margin-bottom:.4rem}
+.stat-label{font-size:.68rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.3rem}
+.stat-value{font-size:1.7rem;font-weight:900;line-height:1}
+
+/* ── CARD ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:1rem;overflow:hidden}
+.card-head{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:1px solid var(--border)}
+.card-title{font-size:.9rem;font-weight:800}
+
+/* ── TABLE ── */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+thead tr{background:rgba(255,255,255,.02)}
+th{padding:.65rem 1rem;font-size:.67rem;color:var(--muted);font-weight:700;text-align:right;white-space:nowrap;border-bottom:1px solid var(--border)}
+tbody tr{border-bottom:1px solid var(--border);transition:background .15s}
+tbody tr:hover{background:rgba(59,130,246,.04)}
+tbody tr.row-new{animation:rowHL 4s ease both}
+@keyframes rowHL{0%,25%{background:rgba(59,130,246,.15)}100%{background:transparent}}
+td{padding:.75rem 1rem;font-size:.8rem;color:var(--sub);vertical-align:middle}
+td strong{color:var(--text);font-weight:700}
+code{color:var(--blue-b);font-size:.72rem;font-family:monospace}
+.badge{display:inline-flex;align-items:center;gap:.3rem;font-size:.65rem;font-weight:800;padding:.22rem .6rem;border-radius:999px}
+.b-wait{background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.25);color:var(--yellow)}
+.b-done{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.25);color:var(--green)}
+.b-cancel{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);color:var(--red)}
+.wa-btn{display:inline-flex;align-items:center;gap:.3rem;background:#25d366;color:#fff;font-size:.72rem;font-weight:800;padding:.3rem .7rem;border-radius:.4rem;text-decoration:none;transition:all .2s;font-family:'Cairo',sans-serif;border:none;cursor:pointer}
+.wa-btn:hover{background:#1da851;transform:scale(1.03)}
+.prep-btn{display:inline-flex;align-items:center;gap:.3rem;background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.35);color:var(--blue-b);font-size:.72rem;font-weight:800;padding:.3rem .7rem;border-radius:.4rem;font-family:'Cairo',sans-serif;cursor:pointer;transition:all .2s}
+.prep-btn:hover{background:rgba(59,130,246,.3);transform:scale(1.03)}
+.sel-status{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:var(--sub);font-family:'Cairo',sans-serif;font-size:.72rem;font-weight:700;padding:.3rem .5rem;border-radius:.4rem;cursor:pointer;outline:none}
+.empty{padding:3rem;text-align:center;color:var(--muted);font-size:.85rem}
+
+/* ════════════════════════════════════
+   🔔 NOTIFICATION WHATSAPP POPUP
+   ════════════════════════════════════ */
+#notif-overlay{
+  position:fixed;inset:0;
+  background:rgba(2,5,16,.85);
+  backdrop-filter:blur(6px);
+  z-index:9999;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:1rem;
+}
+#notif-overlay.show{display:flex}
+
+.notif-box{
+  background:linear-gradient(145deg,#06101f,#0b1d40);
+  border:1px solid rgba(37,211,102,.35);
+  border-radius:1.5rem;
+  padding:2rem 1.75rem;
+  max-width:420px;
+  width:100%;
+  text-align:center;
+  animation:popIn .4s cubic-bezier(.175,.885,.32,1.275) both;
+  box-shadow:0 0 80px rgba(37,211,102,.1),0 24px 60px rgba(0,0,0,.6);
+  position:relative;
+}
+@keyframes popIn{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
+
+.notif-icon{
+  width:72px;height:72px;border-radius:50%;
+  background:linear-gradient(135deg,#16a34a,#22c55e);
+  display:flex;align-items:center;justify-content:center;
+  font-size:2rem;margin:0 auto 1.25rem;
+  box-shadow:0 0 40px rgba(34,197,94,.4);
+  animation:iconPulse 1.5s ease-in-out infinite;
+}
+@keyframes iconPulse{0%,100%{box-shadow:0 0 40px rgba(34,197,94,.4)}50%{box-shadow:0 0 60px rgba(34,197,94,.7)}}
+
+.notif-badge{
+  display:inline-block;
+  background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);
+  color:#f87171;font-size:.72rem;font-weight:800;
+  padding:.25rem .75rem;border-radius:999px;margin-bottom:.75rem;
+}
+.notif-title{font-size:1.4rem;font-weight:900;margin-bottom:1rem;color:var(--text)}
+.notif-title span{color:#4ade80}
+
+.notif-card{
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:1rem;padding:1rem 1.25rem;
+  text-align:right;margin-bottom:1.25rem;
+}
+.notif-row{display:flex;justify-content:space-between;align-items:center;padding:.4rem 0;font-size:.83rem}
+.notif-row:not(:last-child){border-bottom:1px solid rgba(255,255,255,.05)}
+.notif-row .lbl{color:var(--muted);font-weight:600;font-size:.75rem}
+.notif-row .val{color:var(--text);font-weight:700}
+.notif-price{font-size:1.5rem;font-weight:900;color:#4ade80;text-align:center;margin:.75rem 0}
+
+.btn-wa-big{
+  display:flex;align-items:center;justify-content:center;gap:.6rem;
+  width:100%;
+  background:linear-gradient(135deg,#16a34a,#22c55e);
+  color:#fff;font-family:'Cairo',sans-serif;
+  font-size:1.05rem;font-weight:900;
+  padding:1rem;border-radius:.875rem;border:none;
+  cursor:pointer;text-decoration:none;
+  transition:all .25s;margin-bottom:.6rem;
+  box-shadow:0 4px 24px rgba(34,197,94,.4);
+}
+.btn-wa-big:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(34,197,94,.55)}
+.btn-wa-big svg{flex-shrink:0}
+
+.btn-dismiss{
+  width:100%;background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.08);
+  color:var(--muted);font-family:'Cairo',sans-serif;
+  font-size:.85rem;font-weight:700;
+  padding:.75rem;border-radius:.875rem;cursor:pointer;
+  transition:all .2s;
+}
+.btn-dismiss:hover{background:rgba(255,255,255,.1);color:var(--text)}
+
+/* ── TOAST (coin bas gauche) ── */
+#toast-container{position:fixed;bottom:1.25rem;left:1.25rem;z-index:9998;display:flex;flex-direction:column;gap:.6rem;max-width:300px}
+.toast{
+  background:rgba(6,16,31,.97);
+  border:1px solid rgba(37,211,102,.3);
+  border-radius:.875rem;padding:.85rem 1rem;
+  font-size:.78rem;color:var(--sub);
+  animation:toastIn .35s ease both;
+  display:flex;align-items:center;gap:.6rem;
+}
+@keyframes toastIn{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:translateX(0)}}
+.toast-dot{width:8px;height:8px;border-radius:50%;background:#22c55e;flex-shrink:0;animation:blink 1s step-end infinite}
+
+@media(max-width:768px){
+  .sidebar{display:none}
+  .main{padding:1rem}
+  .stats{grid-template-columns:1fr 1fr}
+  #notif-overlay .notif-box{padding:1.5rem 1.25rem}
+}
+</style>
+</head>
+<body>
+
+<div class="orbs"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
+
+<!-- ════════════════════════════════════
+     🔔 NOTIFICATION POPUP WHATSAPP
+     ════════════════════════════════════ -->
+<div id="notif-overlay">
+  <div class="notif-box">
+    <div class="notif-icon">🛒</div>
+    <div class="notif-badge" id="n-badge">⚡ طلب جديد الآن!</div>
+    <h2 class="notif-title">طلب من <span id="n-name">—</span></h2>
+
+    <div class="notif-card">
+      <div class="notif-row"><span class="lbl">📞 الهاتف</span><span class="val" id="n-phone">—</span></div>
+      <div class="notif-row"><span class="lbl">🏙️ المدينة</span><span class="val" id="n-city">—</span></div>
+      <div class="notif-row"><span class="lbl">📍 العنوان</span><span class="val" id="n-address">—</span></div>
+      <div class="notif-row"><span class="lbl">📦 العرض</span><span class="val" id="n-offer">—</span></div>
+      <div class="notif-row"><span class="lbl">🆔 الرقم</span><span class="val" id="n-id" style="font-size:.7rem;color:var(--blue-b)">—</span></div>
+    </div>
+
+    <div class="notif-price" id="n-price">— DH</div>
+
+    <a id="btn-wa" href="#" target="_blank" class="btn-wa-big">
+      <svg width="22" height="22" fill="white" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      فتح واتساب — تأكيد الطلب
+    </a>
+    <button class="btn-dismiss" onclick="closeNotif()">تجاهل — سأتصل لاحقاً</button>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div id="toast-container"></div>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sb-brand">
+      <div class="sb-logo">🎧 AM05 TECH</div>
+      <div class="sb-sub">لوحة التحكم</div>
+    </div>
+    <a href="/admin" class="nav-item active">📦 الطلبات</a>
+    <a href="/" target="_blank" class="nav-item">🌐 الصفحة</a>
+    <div class="sb-footer">
+      <div class="conn">
+        <div class="conn-dot" id="connDot"></div>
+        <span id="connLabel">متصل — مباشر</span>
+      </div>
+      <a href="/admin/logout" style="display:flex;align-items:center;gap:.5rem;font-size:.72rem;font-weight:700;color:var(--red);text-decoration:none;padding:.5rem .75rem;border-radius:.5rem;margin-top:.75rem;transition:background .2s" onmouseover="this.style.background='rgba(239,68,68,.1)'" onmouseout="this.style.background='transparent'">🚪 تسجيل الخروج</a>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- Top bar -->
+    <div class="topbar">
+      <div>
+        <div class="page-title">📦 الطلبات</div>
+        <div style="font-size:.72rem;color:var(--muted);margin-top:.2rem" id="pageDate"></div>
+      </div>
+      <div class="live-pill">
+        <div class="conn-dot"></div>
+        WebSocket مباشر
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat blue">
+        <div class="stat-icon">📦</div>
+        <div class="stat-label">إجمالي الطلبات</div>
+        <div class="stat-value" id="s-total">{{ total }}</div>
+      </div>
+      <div class="stat green">
+        <div class="stat-icon">💰</div>
+        <div class="stat-label">الإيرادات الكلية</div>
+        <div class="stat-value" id="s-revenue">{{ revenue }} DH</div>
+      </div>
+      <div class="stat yellow">
+        <div class="stat-icon">⏳</div>
+        <div class="stat-label">في الانتظار</div>
+        <div class="stat-value" id="s-pending">—</div>
+      </div>
+    </div>
+
+    <!-- Orders table -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">🗂️ قائمة الطلبات</span>
+        <span style="font-size:.72rem;color:var(--blue-b);font-weight:700" id="ordersCount">{{ total }} طلب</span>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>رقم الطلب</th>
+              <th>الاسم</th>
+              <th>الهاتف</th>
+              <th>المدينة</th>
+              <th>العنوان</th>
+              <th>العرض</th>
+              <th>السعر</th>
+              <th>التاريخ</th>
+              <th>الحالة</th>
+              <th>واتساب</th>
+              <th>تجهيز</th>
+              <th>تحديث</th>
+            </tr>
+          </thead>
+          <tbody id="ordersBody">
+            {% for o in orders %}
+            <tr id="row-{{ o.order_id }}">
+              <td><code>{{ o.order_id }}</code></td>
+              <td><strong>{{ o.name }}</strong></td>
+              <td style="white-space:nowrap;font-size:.75rem">{{ o.phone }}</td>
+              <td>{{ o.city }}</td>
+              <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.75rem" title="{{ o.address }}">{{ o.address or '—' }}</td>
+              <td style="font-size:.75rem">{{ o.offer_label }}</td>
+              <td><strong style="color:var(--blue-b)">{{ o.price }}</strong></td>
+              <td style="font-size:.68rem;color:var(--muted);white-space:nowrap">{{ o.date[:16] }}</td>
+              <td>
+                <span id="badge-{{ o.order_id }}" class="badge {% if o.status == 'Livré' %}b-done{% elif o.status == 'Annulé' %}b-cancel{% else %}b-wait{% endif %}">
+                  {% if o.status == 'Livré' %}✅{% elif o.status == 'Annulé' %}❌{% else %}⏳{% endif %} {{ o.status }}
+                </span>
+              </td>
+              <td>
+                <a href="https://wa.me/212{{ o.phone[1:] }}?text={{ ('سلام ' + o.name + '، طلبكم #' + o.order_id + ' جاهز! 🎧') | urlencode }}"
+                   target="_blank" class="wa-btn">
+                  💬 واتساب
+                </a>
+              </td>
+              <td>
+                {% if o.prep_code %}
+                  <span style="font-size:.65rem;font-weight:800;color:var(--green);background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);padding:.25rem .55rem;border-radius:.4rem;white-space:nowrap">✅ {{ o.prep_code }}</span>
+                {% else %}
+                  <button onclick="prepareOrder('{{ o.order_id }}', '{{ o.name }}')" class="prep-btn">📦 جهز</button>
+                {% endif %}
+              </td>
+              <td>
+                <select class="sel-status" onchange="updateStatus('{{ o.order_id }}', this.value)">
+                  <option {% if o.status == 'En attente' %}selected{% endif %}>En attente</option>
+                  <option {% if o.status == 'Livré' %}selected{% endif %}>Livré</option>
+                  <option {% if o.status == 'Annulé' %}selected{% endif %}>Annulé</option>
+                </select>
+              </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="11" class="empty">لا توجد طلبات بعد 🚀<br><small style="color:var(--muted)">في انتظار أول عميل!</small></td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ════════════════════════════════════
+//  WEBSOCKET
+// ════════════════════════════════════
+var socket = io();
+
+socket.on('connect', function() {
+  setConn(true);
+});
+socket.on('disconnect', function() {
+  setConn(false);
+});
+socket.on('stats', function(d) {
+  if (d.total   !== undefined) { document.getElementById('s-total').textContent   = d.total; document.getElementById('ordersCount').textContent = d.total + ' طلب'; }
+  if (d.revenue  !== undefined) document.getElementById('s-revenue').textContent  = d.revenue + ' DH';
+  if (d.pending  !== undefined) document.getElementById('s-pending').textContent  = d.pending;
+});
+
+// ════════════════════════════════════
+//  🔔 NEW ORDER → POPUP
+// ════════════════════════════════════
+socket.on('new_order', function(data) {
+  var o = data.order;
+  var waUrl = data.wa_url;
+
+  // Fill popup
+  document.getElementById('n-name').textContent    = o.name;
+  document.getElementById('n-phone').textContent   = o.phone;
+  document.getElementById('n-city').textContent    = o.city;
+  document.getElementById('n-address').textContent = o.address || '—';
+  document.getElementById('n-offer').textContent   = o.offer_label;
+  document.getElementById('n-id').textContent      = '#' + o.order_id;
+  document.getElementById('n-price').textContent   = o.price;
+  document.getElementById('btn-wa').href           = waUrl;
+
+  // Show popup
+  document.getElementById('notif-overlay').classList.add('show');
+
+  // Play sound
+  playBeep();
+
+  // Browser notification
+  if (Notification.permission === 'granted') {
+    new Notification('🛒 طلب جديد — AM05 TECH', {
+      body: o.name + ' · ' + o.city + ' · ' + o.price,
+    });
+  }
+
+  // Add row to table
+  addRow(o, waUrl);
+
+  // Update stats
+  var total = parseInt(document.getElementById('s-total').textContent || '0') + 1;
+  document.getElementById('s-total').textContent = total;
+  document.getElementById('ordersCount').textContent = total + ' طلب';
+
+  // Toast (backup)
+  showToast(o.name, o.city, o.price);
+});
+
+socket.on('order_updated', function(d) {
+  var badge = document.getElementById('badge-' + d.order_id);
+  if (!badge) return;
+  var cls  = d.status === 'Livré' ? 'b-done' : d.status === 'Annulé' ? 'b-cancel' : 'b-wait';
+  var icon = d.status === 'Livré' ? '✅' : d.status === 'Annulé' ? '❌' : '⏳';
+  badge.className = 'badge ' + cls;
+  badge.textContent = icon + ' ' + d.status;
+});
+
+// ════════════════════════════════════
+//  POPUP
+// ════════════════════════════════════
+window.closeNotif = function() {
+  document.getElementById('notif-overlay').classList.remove('show');
+};
+// Close on overlay click
+document.getElementById('notif-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeNotif();
+});
+
+// ════════════════════════════════════
+//  TOAST
+// ════════════════════════════════════
+function showToast(name, city, price) {
+  var c   = document.getElementById('toast-container');
+  var div = document.createElement('div');
+  div.className = 'toast';
+  div.innerHTML = '<div class="toast-dot"></div><span><strong>' + name + '</strong> · ' + city + ' · ' + price + '</span>';
+  c.prepend(div);
+  setTimeout(function() { if (div.parentNode) div.remove(); }, 8000);
+}
+
+// ════════════════════════════════════
+//  ADD ROW TO TABLE
+// ════════════════════════════════════
+function addRow(o, waUrl) {
+  var tbody = document.getElementById('ordersBody');
+  var empty = tbody.querySelector('.empty');
+  if (empty) empty.closest('tr').remove();
+
+  var waMsg = encodeURIComponent('سلام ' + o.name + '، طلبكم #' + o.order_id + ' جاهز! 🎧');
+  var phone212 = o.phone ? '212' + o.phone.substring(1) : '';
+
+  var tr = document.createElement('tr');
+  tr.id = 'row-' + o.order_id;
+  tr.className = 'row-new';
+  tr.innerHTML =
+    '<td><code>' + o.order_id + '</code></td>' +
+    '<td><strong>' + o.name + '</strong></td>' +
+    '<td style="white-space:nowrap;font-size:.75rem">' + o.phone + '</td>' +
+    '<td>' + o.city + '</td>' +
+    '<td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.75rem">' + (o.address || '—') + '</td>' +
+    '<td style="font-size:.75rem">' + o.offer_label + '</td>' +
+    '<td><strong style="color:var(--blue-b)">' + o.price + '</strong></td>' +
+    '<td style="font-size:.68rem;color:var(--muted);white-space:nowrap">' + o.date.substring(0,16) + '</td>' +
+    '<td><span id="badge-' + o.order_id + '" class="badge b-wait">⏳ En attente</span></td>' +
+    '<td><a href="https://wa.me/' + phone212 + '?text=' + waMsg + '" target="_blank" class="wa-btn">💬 واتساب</a></td>' +
+    '<td><button onclick="prepareOrder(\'' + o.order_id + '\', \'' + o.name + '\')" class="prep-btn">📦 جهز</button></td>' +
+    '<td><select class="sel-status" onchange="updateStatus(\'' + o.order_id + '\', this.value)">' +
+    '<option selected>En attente</option><option>Livré</option><option>Annulé</option></select></td>';
+  tbody.insertBefore(tr, tbody.firstChild);
+}
+
+// ════════════════════════════════════
+//  STATUS UPDATE
+// ════════════════════════════════════
+async function updateStatus(id, status) {
+  await fetch('/api/orders/' + id + '/status', {
+    method:  'PATCH',
+    headers: {'Content-Type':'application/json'},
+    body:    JSON.stringify({status: status}),
+  });
+}
+
+// ════════════════════════════════════
+//  BEEP SOUND
+// ════════════════════════════════════
+function playBeep() {
+  try {
+    var a = new (window.AudioContext || window.webkitAudioContext)();
+    [[880,.05],[1100,.15],[1320,.25]].forEach(function(f) {
+      var o = a.createOscillator(), g = a.createGain();
+      o.connect(g); g.connect(a.destination);
+      o.type = 'sine'; o.frequency.value = f[0];
+      g.gain.setValueAtTime(.25, a.currentTime + f[1]);
+      g.gain.exponentialRampToValueAtTime(.001, a.currentTime + f[1] + .12);
+      o.start(a.currentTime + f[1]); o.stop(a.currentTime + f[1] + .15);
+    });
+  } catch(e) {}
+}
+
+// ════════════════════════════════════
+//  HELPERS
+// ════════════════════════════════════
+function setConn(ok) {
+  var d = document.getElementById('connDot');
+  var l = document.getElementById('connLabel');
+  if (d) { d.className = 'conn-dot' + (ok ? '' : ' off'); }
+  if (l) l.textContent = ok ? 'متصل — مباشر' : 'انقطع الاتصال...';
+}
+
+// Request browser permission
+if ('Notification' in window && Notification.permission === 'default') {
+  Notification.requestPermission();
+}
+
+// Date
+document.getElementById('pageDate').textContent =
+  new Date().toLocaleDateString('ar-MA', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
+</script>
+
+<!-- ════ PREP MODAL ════ -->
+<div id="prep-overlay" style="position:fixed;inset:0;background:rgba(2,5,16,.88);backdrop-filter:blur(8px);z-index:9999;display:none;align-items:center;justify-content:center;padding:1rem">
+  <div style="background:linear-gradient(145deg,#06101f,#0b1d40);border:1px solid rgba(59,130,246,.35);border-radius:1.5rem;padding:2rem 1.75rem;max-width:400px;width:100%;text-align:center;animation:popIn .4s cubic-bezier(.175,.885,.32,1.275) both;box-shadow:0 0 80px rgba(59,130,246,.15)">
+    <div style="width:70px;height:70px;border-radius:50%;background:linear-gradient(135deg,#1d4ed8,#3b82f6);display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto 1rem;box-shadow:0 0 40px rgba(59,130,246,.4)">📦</div>
+    <div id="prep-title" style="font-size:1.3rem;font-weight:900;margin-bottom:.5rem;color:var(--text)">تجهيز الطلب</div>
+    <div id="prep-sub" style="font-size:.83rem;color:var(--sub);margin-bottom:1.5rem">جاري التجهيز...</div>
+
+    <!-- Code result -->
+    <div id="prep-result" style="display:none">
+      <div style="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);border-radius:1rem;padding:1.25rem;margin-bottom:1.25rem">
+        <div style="font-size:.72rem;font-weight:700;color:var(--muted);margin-bottom:.5rem">🔑 كود التجهيز الخاص بالطلب</div>
+        <div id="prep-code-display" style="font-size:1.6rem;font-weight:900;color:#4ade80;letter-spacing:.08em;font-family:monospace"></div>
+      </div>
+      <a id="prep-wa-btn" href="#" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:.6rem;width:100%;background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;font-family:'Cairo',sans-serif;font-size:1rem;font-weight:900;padding:.95rem;border-radius:.875rem;text-decoration:none;margin-bottom:.6rem;box-shadow:0 4px 24px rgba(34,197,94,.4);transition:all .25s" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+        <svg width="20" height="20" fill="white" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        إرسال الكود للعميل على واتساب
+      </a>
+      <button onclick="closePrepModal()" style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:var(--muted);font-family:'Cairo',sans-serif;font-size:.85rem;font-weight:700;padding:.7rem;border-radius:.875rem;cursor:pointer;transition:all .2s" onmouseover="this.style.background='rgba(255,255,255,.1)'" onmouseout="this.style.background='rgba(255,255,255,.05)'">إغلاق</button>
+    </div>
+
+    <!-- Loading -->
+    <div id="prep-loading" style="color:var(--muted);font-size:.85rem">جاري تجهيز الطلب... ⏳</div>
+  </div>
+</div>
+
+<script>
+async function prepareOrder(orderId, clientName) {
+  // Show modal loading
+  document.getElementById('prep-overlay').style.display = 'flex';
+  document.getElementById('prep-title').textContent = 'تجهيز طلب ' + clientName;
+  document.getElementById('prep-sub').textContent = 'يتم الآن إنشاء كود التجهيز...';
+  document.getElementById('prep-result').style.display = 'none';
+  document.getElementById('prep-loading').style.display = 'block';
+
+  try {
+    const res  = await fetch('/api/orders/' + orderId + '/prepare', { method: 'POST' });
+    const data = await res.json();
+    if (data.ok) {
+      document.getElementById('prep-code-display').textContent = data.prep_code;
+      document.getElementById('prep-wa-btn').href = data.wa_url;
+      document.getElementById('prep-sub').textContent = '✅ الطلب تم تجهيزه بنجاح!';
+      document.getElementById('prep-loading').style.display = 'none';
+      document.getElementById('prep-result').style.display = 'block';
+      // Update badge in table
+      var badge = document.getElementById('badge-' + orderId);
+      if (badge) { badge.className = 'badge b-done'; badge.textContent = '✅ Préparé'; }
+      // Update button to show code
+      var btn = document.querySelector('[onclick*="prepareOrder(\''+orderId+'\',"]');
+      if (btn && btn.tagName === 'BUTTON') {
+        var td = btn.parentElement;
+        td.innerHTML = '<span style="font-size:.65rem;font-weight:800;color:var(--green);background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);padding:.25rem .55rem;border-radius:.4rem;white-space:nowrap">✅ ' + data.prep_code + '</span>';
+      }
+    }
+  } catch(e) {
+    document.getElementById('prep-sub').textContent = '❌ خطأ — حاول مجدداً';
+    document.getElementById('prep-loading').style.display = 'none';
+  }
+}
+
+function closePrepModal() {
+  document.getElementById('prep-overlay').style.display = 'none';
+}
+
+document.getElementById('prep-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closePrepModal();
+});
+</script>
+
+</body>
+</html>

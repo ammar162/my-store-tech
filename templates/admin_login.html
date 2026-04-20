@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AM05 TECH — دخول الأدمين</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#020510;--card:rgba(8,18,38,0.95);
+  --blue:#3b82f6;--blue-b:#60a5fa;
+  --text:#f0f4ff;--sub:#94a3b8;--muted:#475569;
+  --border:rgba(255,255,255,0.08);
+  --red:#ef4444;--green:#22c55e;
+}
+body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem}
+
+/* ORBS */
+.orbs{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.1;animation:orbF linear infinite}
+.orb-1{width:500px;height:500px;background:radial-gradient(circle,#3b82f6,transparent);top:-10%;right:-10%;animation-duration:20s}
+.orb-2{width:400px;height:400px;background:radial-gradient(circle,#a78bfa,transparent);bottom:-10%;left:-10%;animation-duration:25s;animation-delay:-10s}
+@keyframes orbF{0%,100%{transform:translateY(0)}50%{transform:translateY(-30px)}}
+
+.login-wrap{position:relative;z-index:1;width:100%;max-width:420px}
+
+.lock-icon{
+  width:80px;height:80px;border-radius:50%;
+  background:linear-gradient(135deg,#1d4ed8,#3b82f6);
+  display:flex;align-items:center;justify-content:center;
+  font-size:2rem;margin:0 auto 1.5rem;
+  box-shadow:0 0 40px rgba(59,130,246,.4);
+  animation:iconPulse 2s ease-in-out infinite;
+}
+@keyframes iconPulse{0%,100%{box-shadow:0 0 40px rgba(59,130,246,.4)}50%{box-shadow:0 0 60px rgba(59,130,246,.7)}}
+
+.login-box{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:1.5rem;
+  padding:2.5rem 2rem;
+  backdrop-filter:blur(20px);
+  box-shadow:0 24px 60px rgba(0,0,0,.5);
+  position:relative;
+  overflow:hidden;
+}
+.login-box::before{
+  content:'';position:absolute;inset:-2px;border-radius:inherit;
+  background:linear-gradient(135deg,rgba(59,130,246,.3),rgba(167,139,250,.15),rgba(34,211,238,.1));
+  z-index:-1;filter:blur(1px);
+}
+
+.login-title{font-size:1.5rem;font-weight:900;text-align:center;margin-bottom:.4rem}
+.login-sub{font-size:.82rem;color:var(--muted);text-align:center;margin-bottom:2rem}
+
+.field-label{font-size:.78rem;font-weight:700;color:var(--sub);margin-bottom:.4rem;display:block}
+.field-group{margin-bottom:1.2rem}
+.login-input{
+  width:100%;padding:.9rem 1.1rem;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:.875rem;color:var(--text);
+  font-family:'Cairo',sans-serif;font-size:.95rem;
+  outline:none;transition:border-color .25s,background .25s,box-shadow .25s;
+}
+.login-input::placeholder{color:var(--muted)}
+.login-input:focus{border-color:var(--blue);background:rgba(59,130,246,.07);box-shadow:0 0 0 3px rgba(59,130,246,.12)}
+
+.error-msg{
+  background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);
+  color:#fca5a5;font-size:.82rem;font-weight:700;
+  padding:.7rem 1rem;border-radius:.75rem;
+  margin-bottom:1.2rem;text-align:center;
+}
+
+.login-btn{
+  width:100%;padding:1.1rem;
+  background:linear-gradient(135deg,#1d4ed8,#2563eb);
+  color:#fff;font-family:'Cairo',sans-serif;
+  font-size:1rem;font-weight:900;
+  border:none;border-radius:1rem;cursor:pointer;
+  transition:transform .2s,box-shadow .2s;
+  position:relative;overflow:hidden;
+}
+.login-btn::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 40%,rgba(255,255,255,.08));pointer-events:none}
+.login-btn:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(37,99,235,.5)}
+.login-btn:active{transform:translateY(0)}
+
+.security-note{
+  display:flex;align-items:center;justify-content:center;gap:.4rem;
+  margin-top:1.25rem;font-size:.72rem;color:var(--muted);
+}
+</style>
+</head>
+<body>
+
+<div class="orbs"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
+
+<div class="login-wrap">
+  <div class="lock-icon">🔐</div>
+  <div class="login-box">
+    <h1 class="login-title">لوحة تحكم الأدمين</h1>
+    <p class="login-sub">AM05 TECH — أدخل الكود وكلمة السر للدخول</p>
+
+    {% if error %}
+    <div class="error-msg">{{ error }}</div>
+    {% endif %}
+
+    <form method="POST" action="/admin/login">
+      <div class="field-group">
+        <label class="field-label">🔑 الكود (Code)</label>
+        <input type="text" name="code" class="login-input" placeholder="أدخل الكود..." autocomplete="username" required>
+      </div>
+      <div class="field-group">
+        <label class="field-label">🔒 كلمة السر (Mot de passe)</label>
+        <input type="password" name="password" class="login-input" placeholder="أدخل كلمة السر..." autocomplete="current-password" required>
+      </div>
+      <button type="submit" class="login-btn">دخول إلى لوحة التحكم 🚀</button>
+    </form>
+
+    <div class="security-note">🛡️ وصول مؤمن — للأدمين فقط</div>
+  </div>
+</div>
+
+</body>
+</html>

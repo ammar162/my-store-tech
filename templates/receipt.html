@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>وصل الطلب #{{ order_id }} — AM05 TECH</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: #020510;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+            color: #f0f4ff;
+        }
+
+        /* Animated background orbs */
+        .orbs { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.1; animation: orbFloat linear infinite; }
+        .orb-1 { width: 500px; height: 500px; background: radial-gradient(circle, #3b82f6, transparent); top: -10%; right: -10%; animation-duration: 20s; }
+        .orb-2 { width: 400px; height: 400px; background: radial-gradient(circle, #22d3ee, transparent); bottom: -10%; left: -10%; animation-duration: 25s; }
+        @keyframes orbFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-30px)} }
+
+        .wrapper {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 520px;
+            animation: fadeUp 0.7s ease both;
+        }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+
+        /* SUCCESS HEADER */
+        .success-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .check-circle {
+            width: 70px; height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #16a34a, #22c55e);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 2rem;
+            box-shadow: 0 0 40px rgba(34,197,94,0.4);
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.3s both;
+        }
+        @keyframes popIn { from{transform:scale(0)} to{transform:scale(1)} }
+        .success-title { font-size: 1.5rem; font-weight: 900; color: #f0f4ff; }
+        .success-sub { font-size: 0.88rem; color: #94a3b8; margin-top: 0.3rem; }
+
+        /* RECEIPT CARD */
+        .receipt {
+            background: linear-gradient(145deg, rgba(8,18,40,0.95), rgba(12,26,60,0.9));
+            border: 1px solid rgba(59,130,246,0.2);
+            border-radius: 1.5rem;
+            overflow: hidden;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.03);
+        }
+
+        /* RECEIPT TOP */
+        .receipt-top {
+            background: linear-gradient(135deg, #1e3a8a, #1d4ed8, #2563eb);
+            padding: 1.5rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+        .receipt-brand { display: flex; align-items: center; gap: 0.75rem; }
+        .brand-logo {
+            width: 42px; height: 42px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.3rem;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .brand-name { font-size: 1.1rem; font-weight: 900; color: #fff; }
+        .brand-sub { font-size: 0.7rem; color: rgba(255,255,255,0.7); }
+        .receipt-id-block { text-align: left; }
+        .receipt-id-label { font-size: 0.65rem; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.1em; }
+        .receipt-id { font-size: 0.85rem; font-weight: 800; color: #fff; font-family: monospace; }
+
+        /* DASHED DIVIDER */
+        .dashed { border: none; border-top: 2px dashed rgba(255,255,255,0.08); margin: 0; }
+
+        /* RECEIPT BODY */
+        .receipt-body { padding: 1.75rem 2rem; }
+
+        .receipt-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 0.65rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+        .receipt-row:last-child { border-bottom: none; }
+        .row-label {
+            font-size: 0.78rem;
+            color: #64748b;
+            font-weight: 600;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .row-value {
+            font-size: 0.88rem;
+            color: #e2e8f0;
+            font-weight: 700;
+            text-align: left;
+            max-width: 60%;
+            word-break: break-word;
+        }
+
+        /* PRICE ROW */
+        .price-row {
+            background: rgba(59,130,246,0.08);
+            border: 1px solid rgba(59,130,246,0.15);
+            border-radius: 0.75rem;
+            padding: 0.9rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+        }
+        .price-label { font-size: 0.85rem; color: #94a3b8; font-weight: 700; }
+        .price-amount { font-size: 1.5rem; font-weight: 900; color: #60a5fa; }
+
+        /* STATUS BADGE */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: rgba(245,158,11,0.12);
+            border: 1px solid rgba(245,158,11,0.3);
+            color: #fbbf24;
+            font-size: 0.75rem;
+            font-weight: 800;
+            padding: 0.3rem 0.8rem;
+            border-radius: 999px;
+        }
+        .status-dot { width:7px; height:7px; border-radius:50%; background:#fbbf24; animation: blink 1s step-end infinite; }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+        /* QR SECTION */
+        .qr-section {
+            border-top: 2px dashed rgba(255,255,255,0.07);
+            padding: 1.5rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        .qr-wrap {
+            flex-shrink: 0;
+            background: #fff;
+            border-radius: 0.875rem;
+            padding: 0.6rem;
+            box-shadow: 0 0 30px rgba(59,130,246,0.2);
+        }
+        .qr-wrap img { display: block; width: 110px; height: 110px; }
+        .qr-info { flex: 1; }
+        .qr-title { font-size: 0.9rem; font-weight: 800; color: #e2e8f0; margin-bottom: 0.35rem; }
+        .qr-desc { font-size: 0.75rem; color: #64748b; line-height: 1.6; }
+
+        /* BOTTOM */
+        .receipt-bottom {
+            background: rgba(255,255,255,0.02);
+            border-top: 1px solid rgba(255,255,255,0.05);
+            padding: 1rem 2rem;
+            text-align: center;
+        }
+        .delivery-info { font-size: 0.8rem; color: #94a3b8; font-weight: 600; line-height: 1.7; }
+
+        /* ACTIONS */
+        .actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.25rem;
+            flex-wrap: wrap;
+        }
+        .btn-primary {
+            flex: 1;
+            background: #25d366;
+            color: #fff;
+            font-family: 'Cairo', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 800;
+            padding: 0.85rem 1rem;
+            border-radius: 0.75rem;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(37,211,102,0.4); }
+        .btn-secondary {
+            flex: 1;
+            background: rgba(255,255,255,0.05);
+            color: #94a3b8;
+            font-family: 'Cairo', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 700;
+            padding: 0.85rem 1rem;
+            border-radius: 0.75rem;
+            border: 1px solid rgba(255,255,255,0.08);
+            cursor: pointer;
+            text-decoration: none;
+            display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+            transition: all 0.2s;
+        }
+        .btn-secondary:hover { background: rgba(255,255,255,0.08); color: #e2e8f0; }
+
+        .footer-note { text-align: center; color: #334155; font-size: 0.72rem; margin-top: 1.5rem; }
+
+        @media print {
+            body { background: #fff; padding: 0; }
+            .orbs, .actions { display: none; }
+            .receipt { box-shadow: none; border: 1px solid #ddd; }
+        }
+        @media (max-width: 480px) {
+            .receipt-top { flex-direction: column; align-items: flex-start; }
+            .qr-section { flex-direction: column; align-items: center; text-align: center; }
+            .actions { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+</div>
+
+<div class="wrapper">
+
+    <!-- Success header -->
+    <div class="success-header">
+        <div class="check-circle">✓</div>
+        <h1 class="success-title">تم تسجيل طلبك بنجاح!</h1>
+        <p class="success-sub">{{ date_pretty }} · سنتصل بك قريباً لتأكيد التوصيل</p>
+    </div>
+
+    <!-- Receipt card -->
+    <div class="receipt">
+
+        <!-- Top header -->
+        <div class="receipt-top">
+            <div class="receipt-brand">
+                <div class="brand-logo">🎧</div>
+                <div>
+                    <div class="brand-name">AM05 TECH</div>
+                    <div class="brand-sub">وصل الطلب الرسمي</div>
+                </div>
+            </div>
+            <div class="receipt-id-block">
+                <div class="receipt-id-label">رقم الطلب</div>
+                <div class="receipt-id">#{{ order_id }}</div>
+                <div class="status-badge" style="margin-top:0.4rem">
+                    <span class="status-dot"></span>
+                    في انتظار التوصيل
+                </div>
+            </div>
+        </div>
+
+        <hr class="dashed">
+
+        <!-- Body -->
+        <div class="receipt-body">
+            <div class="receipt-row">
+                <span class="row-label">👤 الاسم</span>
+                <span class="row-value">{{ name }}</span>
+            </div>
+            <div class="receipt-row">
+                <span class="row-label">📞 الهاتف</span>
+                <span class="row-value">{{ phone }}</span>
+            </div>
+            <div class="receipt-row">
+                <span class="row-label">🏙️ المدينة</span>
+                <span class="row-value">{{ city }}</span>
+            </div>
+            {% if address %}
+            <div class="receipt-row">
+                <span class="row-label">📍 العنوان</span>
+                <span class="row-value">{{ address }}</span>
+            </div>
+            {% endif %}
+            <div class="receipt-row">
+                <span class="row-label">🎧 المنتج</span>
+                <span class="row-value">AirPods Pro 2 — نسخة USA 🇺🇸</span>
+            </div>
+            <div class="receipt-row">
+                <span class="row-label">📦 العرض</span>
+                <span class="row-value">{{ offer_label }}</span>
+            </div>
+
+            <!-- Price -->
+            <div class="price-row">
+                <span class="price-label">💰 المبلغ — الدفع عند الاستلام</span>
+                <span class="price-amount">{{ offer_price }}</span>
+            </div>
+        </div>
+
+        <!-- QR Section -->
+        <div class="qr-section">
+            <div class="qr-wrap">
+                <img src="data:image/png;base64,{{ qr_b64 }}" alt="QR Code">
+            </div>
+            <div class="qr-info">
+                <div class="qr-title">📲 QR Code الطلب</div>
+                <div class="qr-desc">
+                    امسح هذا الـ QR للاطلاع على تفاصيل طلبك الكاملة.<br>
+                    يمكن استخدامه للتحقق من الطلب عند التوصيل.
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom info -->
+        <div class="receipt-bottom">
+            <div class="delivery-info">
+                🚚 التوصيل مجاني في جميع مدن المغرب خلال 24 ساعة<br>
+                🛡️ ضمان شهرين · الدفع عند الاستلام فقط<br>
+                📞 للتواصل: <strong style="color:#60a5fa">0626379109</strong>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="actions">
+                <a href="https://wa.me/212626379109?text=السلام%20عليكم%2C%20عندي%20طلب%20رقم%20%23{{ order_id }}" 
+                   target="_blank" class="btn-primary">
+                    <svg width="18" height="18" fill="white" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                    تتبع عبر واتساب
+                </a>
+                <button onclick="window.print()" class="btn-secondary">
+                    🖨️ طباعة الوصل
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <p class="footer-note">AM05 TECH © 2026 · شكراً على ثقتك بنا ❤️</p>
+</div>
+
+<script>
+    // ── Auto-open WhatsApp (CLIENT confirms order) ──
+    const waMsg = encodeURIComponent(
+        `السلام عليكم، أنا {{ name }}\n` +
+        `طلبت AirPods Pro 2 ({{ offer_label }})\n` +
+        `رقم طلبي: #{{ order_id }}\n` +
+        `المدينة: {{ city }}\n` +
+        `العنوان: {{ address }}\n` +
+        `ننتظر التأكيد — شكراً! 🎧`
+    );
+    // Open WhatsApp for client to confirm
+    setTimeout(() => {
+        window.open(`https://wa.me/212626379109?text=${waMsg}`, '_blank');
+    }, 1500);
+
+    // ── Print function ──
+    function printReceipt() { window.print(); }
+</script>
+</body>
+</html>

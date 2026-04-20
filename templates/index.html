@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AM05 TECH - AirPods Pro 2 | عرض محدود</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg-deepest: #020510;
+            --bg-card: rgba(8,18,38,0.75);
+            --accent-blue: #3b82f6;
+            --accent-blue-bright: #60a5fa;
+            --accent-purple: #a78bfa;
+            --accent-cyan: #22d3ee;
+            --text-primary: #f0f4ff;
+            --text-secondary: #94a3b8;
+            --text-muted: #475569;
+            --border-subtle: rgba(255,255,255,0.06);
+            --border-blue: rgba(59,130,246,0.3);
+            --glow-blue: rgba(59,130,246,0.4);
+        }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Cairo', sans-serif; background-color: var(--bg-deepest); color: var(--text-primary); overflow-x: hidden; }
+        body::before { content:''; position:fixed; inset:0; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events:none; z-index:1000; opacity:0.4; }
+
+        /* ORBS */
+        .orbs { position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
+        .orb { position:absolute; border-radius:50%; filter:blur(80px); opacity:0.12; animation:orbFloat linear infinite; }
+        .orb-1 { width:600px; height:600px; background:radial-gradient(circle,#3b82f6,transparent); top:-10%; right:-10%; animation-duration:20s; }
+        .orb-2 { width:500px; height:500px; background:radial-gradient(circle,#a78bfa,transparent); bottom:10%; left:-8%; animation-duration:25s; animation-delay:-8s; }
+        .orb-3 { width:350px; height:350px; background:radial-gradient(circle,#22d3ee,transparent); top:40%; left:40%; animation-duration:18s; animation-delay:-5s; }
+        @keyframes orbFloat { 0%,100%{transform:translateY(0) scale(1)} 50%{transform:translateY(-40px) scale(1.05)} }
+
+        .glass { background:var(--bg-card); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border:1px solid var(--border-subtle); }
+
+        /* ======= ANNOUNCEMENT BAR ======= */
+        .announcement-bar {
+            background: linear-gradient(90deg, #7c3aed, #9333ea, #7c3aed);
+            background-size: 200% 100%;
+            animation: gradientShift 4s ease infinite;
+            padding: 0.55rem 1rem;
+            text-align: center;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #fff;
+            position: sticky;
+            top: 0;
+            z-index: 900;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        @keyframes gradientShift { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
+        .announcement-bar span { opacity: 0.85; margin: 0 0.75rem; }
+
+        /* ======= COUNTDOWN BAR ======= */
+        .countdown-bar {
+            background: rgba(8,18,38,0.95);
+            border-bottom: 1px solid rgba(239,68,68,0.3);
+            padding: 0.7rem 1rem;
+            position: sticky;
+            top: 36px;
+            z-index: 899;
+        }
+        .countdown-inner {
+            max-width: 700px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .countdown-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #f87171;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .countdown-label::before { content: '🔴'; font-size: 0.6rem; animation: blink 1s step-end infinite; }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+        .time-units { display: flex; gap: 0.5rem; align-items: center; }
+        .time-box {
+            background: linear-gradient(145deg, rgba(239,68,68,0.15), rgba(220,38,38,0.1));
+            border: 1px solid rgba(239,68,68,0.3);
+            border-radius: 0.5rem;
+            padding: 0.35rem 0.7rem;
+            text-align: center;
+            min-width: 52px;
+        }
+        .time-box span { font-size: 1.3rem; font-weight: 900; color: #f87171; display: block; line-height: 1; }
+        .time-box small { font-size: 0.6rem; color: var(--text-muted); display: block; margin-top: 2px; }
+        .time-sep { color: #f87171; font-weight: 900; font-size: 1.2rem; opacity: 0.6; }
+
+        /* ======= HERO ======= */
+        .hero { position:relative; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:2rem 1rem; }
+        .hero-video { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0.25; filter:grayscale(40%) blur(1px); z-index:1; }
+        .hero-overlay { position:absolute; inset:0; background:linear-gradient(to bottom,rgba(2,5,16,0.5) 0%,rgba(2,5,16,0.3) 50%,var(--bg-deepest) 100%); z-index:2; }
+        .hero-content { position:relative; z-index:3; text-align:center; max-width:780px; width:100%; animation:fadeUp 1s ease both; }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(40px)} to{opacity:1;transform:translateY(0)} }
+        .hero-logo { height:64px; width:auto; margin:0 auto 2rem; filter:drop-shadow(0 0 20px var(--glow-blue)); }
+        .hero-badge { display:inline-flex; align-items:center; gap:0.5rem; background:rgba(59,130,246,0.12); border:1px solid var(--border-blue); color:var(--accent-blue-bright); font-size:0.8rem; font-weight:700; padding:0.4rem 1rem; border-radius:999px; margin-bottom:1.5rem; }
+        .hero-title { font-size:clamp(2.4rem,6vw,4.2rem); font-weight:900; line-height:1.15; margin-bottom:1.25rem; letter-spacing:-0.02em; }
+        .hero-title .line1 { color:var(--text-primary); display:block; }
+        .hero-title .gradient-text { background:linear-gradient(135deg,var(--accent-blue-bright) 0%,var(--accent-purple) 50%,var(--accent-cyan) 100%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; display:block; }
+        .hero-sub { color:var(--text-secondary); font-size:1.05rem; line-height:1.8; max-width:540px; margin:0 auto 2.5rem; }
+        .price-block { display:flex; align-items:center; justify-content:center; gap:1.2rem; flex-wrap:wrap; margin-bottom:2.5rem; }
+        .price-main { font-size:3.5rem; font-weight:900; color:var(--accent-blue-bright); line-height:1; text-shadow:0 0 40px rgba(96,165,250,0.5); }
+        .price-old { font-size:1.4rem; color:var(--text-muted); text-decoration:line-through; }
+        .price-badge { background:linear-gradient(135deg,rgba(59,130,246,0.2),rgba(167,139,250,0.2)); border:1px solid rgba(167,139,250,0.3); color:var(--accent-purple); font-size:0.85rem; font-weight:800; padding:0.4rem 0.9rem; border-radius:999px; }
+        .cta-btn { display:inline-flex; align-items:center; gap:0.6rem; background:linear-gradient(135deg,#1d4ed8,#2563eb); color:#fff; font-family:'Cairo',sans-serif; font-size:1.1rem; font-weight:900; padding:1.1rem 2.8rem; border-radius:999px; border:none; cursor:pointer; text-decoration:none; transition:transform 0.25s,box-shadow 0.25s; animation:ctaPulse 2.5s ease-in-out infinite; position:relative; overflow:hidden; }
+        .cta-btn::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg,transparent 40%,rgba(255,255,255,0.08)); pointer-events:none; }
+        .cta-btn:hover { transform:translateY(-3px) scale(1.02); box-shadow:0 0 40px var(--glow-blue); }
+        @keyframes ctaPulse { 0%,100%{box-shadow:0 0 20px rgba(37,99,235,0.5),0 4px 20px rgba(0,0,0,0.3)} 50%{box-shadow:0 0 45px rgba(37,99,235,0.85),0 4px 20px rgba(0,0,0,0.3)} }
+        .delivery-note { color:var(--text-muted); font-size:0.82rem; margin-top:1.2rem; }
+
+        /* ======= STOCK BAR ======= */
+        .stock-widget {
+            margin-top: 1.5rem;
+            background: rgba(239,68,68,0.08);
+            border: 1px solid rgba(239,68,68,0.25);
+            border-radius: 1rem;
+            padding: 0.9rem 1.25rem;
+            max-width: 380px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .stock-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; font-size:0.82rem; font-weight:700; }
+        .stock-label { color:#f87171; }
+        .stock-count { color:var(--text-secondary); }
+        .stock-bar-bg { height:6px; background:rgba(255,255,255,0.08); border-radius:999px; overflow:hidden; }
+        .stock-bar-fill { height:100%; width:23%; background:linear-gradient(90deg,#ef4444,#f97316); border-radius:999px; animation:stockPulse 2s ease-in-out infinite; }
+        @keyframes stockPulse { 0%,100%{opacity:1} 50%{opacity:0.7} }
+        .stock-buyers { font-size:0.75rem; color:var(--text-muted); margin-top:0.4rem; text-align:center; }
+
+        /* ======= TRUST BAR ======= */
+        .trust-bar { position:relative; z-index:3; background:rgba(8,18,38,0.8); border-top:1px solid var(--border-subtle); border-bottom:1px solid var(--border-subtle); padding:1rem 2rem; }
+        .trust-inner { max-width:900px; margin:0 auto; display:flex; justify-content:center; align-items:center; gap:2.5rem; flex-wrap:wrap; }
+        .trust-item { display:flex; align-items:center; gap:0.5rem; font-size:0.85rem; color:var(--text-secondary); font-weight:600; }
+
+        /* ======= MAIN ======= */
+        main { position:relative; z-index:3; max-width:1000px; margin:0 auto; padding:5rem 1.5rem; }
+        .content-section { margin-bottom:7rem; }
+        .section-header { text-align:center; margin-bottom:3rem; }
+        .section-label { display:inline-block; font-size:0.75rem; font-weight:700; letter-spacing:0.15em; text-transform:uppercase; color:var(--accent-blue-bright); background:rgba(59,130,246,0.1); border:1px solid var(--border-blue); padding:0.3rem 0.9rem; border-radius:999px; margin-bottom:1rem; }
+        .section-title { font-size:clamp(1.8rem,4vw,2.6rem); font-weight:900; background:linear-gradient(135deg,var(--text-primary) 60%,var(--accent-blue-bright)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+        .section-divider { width:60px; height:3px; background:linear-gradient(90deg,var(--accent-blue),var(--accent-purple)); border-radius:999px; margin:0.75rem auto 0; }
+
+        /* ======= DELIVERY BANNER ======= */
+        .delivery-banner {
+            background: linear-gradient(135deg,rgba(34,211,238,0.12),rgba(59,130,246,0.12));
+            border: 1px solid rgba(59,130,246,0.25);
+            border-radius: 1rem;
+            padding: 1rem 1.25rem;
+            text-align: center;
+            font-weight: 700;
+            line-height: 1.8;
+            margin-bottom: 2rem;
+            color: var(--text-primary);
+        }
+        .delivery-banner a { color:var(--accent-cyan); text-decoration:none; }
+
+        /* ======= GALLERY ======= */
+        .gallery-section { margin-bottom:7rem; }
+        .slider-wrapper { position:relative; border-radius:1.5rem; overflow:hidden; background:rgba(8,18,38,0.6); border:1px solid var(--border-subtle); margin-bottom:1.25rem; aspect-ratio:16/9; max-height:520px; }
+        .slider-track { display:flex; height:100%; transition:transform 0.55s cubic-bezier(0.4,0,0.2,1); }
+        .slide { min-width:100%; height:100%; position:relative; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+        .slide img { width:100%; height:100%; object-fit:cover; display:block; transition:transform 0.6s ease; }
+        .slide:hover img { transform:scale(1.03); }
+        .slide-caption { position:absolute; bottom:0; left:0; right:0; padding:3rem 1.5rem 1.25rem; background:linear-gradient(to top,rgba(2,5,16,0.85) 0%,transparent 100%); font-size:0.9rem; font-weight:600; color:var(--text-secondary); pointer-events:none; }
+        .slide-counter { position:absolute; top:1rem; left:1rem; background:rgba(8,18,38,0.75); backdrop-filter:blur(8px); border:1px solid var(--border-subtle); color:var(--text-secondary); font-size:0.8rem; font-weight:700; padding:0.3rem 0.8rem; border-radius:999px; z-index:5; }
+        .slider-arrow { position:absolute; top:50%; transform:translateY(-50%); width:46px; height:46px; border-radius:50%; background:rgba(8,18,38,0.75); border:1px solid rgba(59,130,246,0.3); color:var(--accent-blue-bright); display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:10; transition:all 0.25s; backdrop-filter:blur(10px); }
+        .slider-arrow:hover { background:rgba(59,130,246,0.2); border-color:var(--accent-blue); transform:translateY(-50%) scale(1.08); }
+        .slider-arrow-prev { right:1rem; }
+        .slider-arrow-next { left:1rem; }
+        .slider-arrow svg { width:20px; height:20px; stroke:currentColor; stroke-width:2.5; fill:none; }
+        .slider-dots { display:flex; justify-content:center; gap:0.5rem; margin-bottom:1.25rem; }
+        .dot { width:8px; height:8px; border-radius:999px; background:var(--text-muted); cursor:pointer; transition:all 0.3s; border:none; padding:0; }
+        .dot.active { background:var(--accent-blue); width:28px; box-shadow:0 0 10px rgba(59,130,246,0.5); }
+        .thumbnails { display:grid; grid-template-columns:repeat(6,1fr); gap:0.75rem; }
+        .thumb { border-radius:0.75rem; overflow:hidden; cursor:pointer; border:2px solid transparent; transition:all 0.25s; aspect-ratio:1; background:rgba(8,18,38,0.6); }
+        .thumb img { width:100%; height:100%; object-fit:cover; display:block; transition:transform 0.3s,filter 0.3s; filter:brightness(0.6) saturate(0.7); }
+        .thumb:hover img { filter:brightness(0.85) saturate(1); transform:scale(1.05); }
+        .thumb.active { border-color:var(--accent-blue); box-shadow:0 0 18px rgba(59,130,246,0.4); }
+        .thumb.active img { filter:brightness(1) saturate(1); }
+
+        /* ======= FEATURES ======= */
+        .features-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1.5rem; }
+        .feature-card { padding:2rem; border-radius:1.25rem; transition:transform 0.3s,box-shadow 0.3s,border-color 0.3s; position:relative; overflow:hidden; }
+        .feature-card::after { content:''; position:absolute; inset:0; border-radius:inherit; background:linear-gradient(135deg,rgba(255,255,255,0.03) 0%,transparent 60%); pointer-events:none; }
+        .feature-card:hover { transform:translateY(-6px); box-shadow:0 20px 60px rgba(0,0,0,0.4),0 0 30px rgba(59,130,246,0.1); border-color:rgba(59,130,246,0.2); }
+        .feature-icon-wrap { width:56px; height:56px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:1.6rem; margin-bottom:1.25rem; background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.2); }
+        .feature-card.highlight .feature-icon-wrap { background:rgba(96,165,250,0.15); border-color:rgba(96,165,250,0.3); }
+        .feature-card.highlight { border-color:rgba(59,130,246,0.25)!important; background:linear-gradient(145deg,rgba(8,20,50,0.9),rgba(15,30,70,0.6)); }
+        .feature-title { font-size:1.1rem; font-weight:800; margin-bottom:0.5rem; color:var(--text-primary); }
+        .feature-card.highlight .feature-title { color:var(--accent-blue-bright); }
+        .feature-desc { font-size:0.88rem; color:var(--text-secondary); line-height:1.7; }
+
+        /* ======= SPECS ======= */
+        .specs-table { width:100%; border-collapse:separate; border-spacing:0; }
+        .specs-table tr { border-bottom:1px solid var(--border-subtle); transition:background 0.2s; }
+        .specs-table tr:hover { background:rgba(59,130,246,0.04); }
+        .specs-table td { padding:0.9rem 1.2rem; font-size:0.9rem; }
+        .specs-table td:first-child { color:var(--text-muted); font-weight:600; width:40%; }
+        .specs-table td:last-child { color:var(--text-primary); font-weight:700; }
+
+        /* ======= REVIEWS ======= */
+        .reviews-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:1.25rem; }
+        .review-card { padding:1.5rem; border-radius:1rem; }
+        .stars { color:#f59e0b; font-size:0.9rem; margin-bottom:0.75rem; }
+        .review-text { font-size:0.9rem; color:var(--text-secondary); line-height:1.7; margin-bottom:1rem; font-style:italic; }
+        .reviewer { display:flex; align-items:center; gap:0.75rem; }
+        .reviewer-avatar { width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,var(--accent-blue),var(--accent-purple)); display:flex; align-items:center; justify-content:center; font-size:0.85rem; font-weight:800; color:#fff; flex-shrink:0; }
+        .reviewer-name { font-size:0.85rem; font-weight:700; color:var(--text-primary); }
+        .reviewer-city { font-size:0.75rem; color:var(--text-muted); }
+
+        /* ======= FORM ======= */
+        .form-section { position:relative; padding:3rem 2.5rem; border-radius:2rem; max-width:680px; margin:0 auto; }
+        .form-section::before { content:''; position:absolute; inset:-2px; border-radius:inherit; background:linear-gradient(135deg,rgba(59,130,246,0.3),rgba(167,139,250,0.2),rgba(34,211,238,0.15)); z-index:-1; filter:blur(1px); }
+        .form-title { font-size:1.8rem; font-weight:900; margin-bottom:0.4rem; }
+        .form-sub { color:var(--text-secondary); font-size:0.9rem; margin-bottom:2rem; }
+        .form-input { width:100%; padding:1rem 1.25rem; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:0.875rem; color:var(--text-primary); font-family:'Cairo',sans-serif; font-size:0.95rem; outline:none; transition:border-color 0.25s,background 0.25s,box-shadow 0.25s; }
+        .form-input::placeholder { color:var(--text-muted); }
+        .form-input:focus { border-color:var(--accent-blue); background:rgba(59,130,246,0.07); box-shadow:0 0 0 3px rgba(59,130,246,0.12); }
+        .offer-radio { display:none; }
+        .offer-label { display:flex; align-items:center; gap:1rem; padding:1.1rem 1.25rem; border-radius:1rem; border:1px solid rgba(255,255,255,0.06); background:rgba(255,255,255,0.03); cursor:pointer; transition:all 0.25s; position:relative; overflow:hidden; }
+        .offer-label::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(59,130,246,0.08),transparent); opacity:0; transition:opacity 0.25s; }
+        .offer-radio:checked + .offer-label { border-color:var(--accent-blue); background:rgba(59,130,246,0.1); box-shadow:0 0 20px rgba(59,130,246,0.12); }
+        .offer-radio:checked + .offer-label::before { opacity:1; }
+        .offer-radio:checked + .offer-label .offer-dot { background:var(--accent-blue); box-shadow:0 0 12px rgba(59,130,246,0.6); }
+        .offer-dot { width:18px; height:18px; border-radius:50%; border:2px solid rgba(255,255,255,0.2); flex-shrink:0; transition:all 0.25s; }
+        .offer-text { font-size:1rem; font-weight:700; color:var(--text-primary); }
+        .offer-popular { margin-right:auto; background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.3); color:#f59e0b; font-size:0.7rem; font-weight:800; padding:0.2rem 0.6rem; border-radius:999px; }
+        .submit-btn { width:100%; padding:1.2rem; background:linear-gradient(135deg,#1d4ed8,#2563eb,#1d4ed8); background-size:200% 100%; color:#fff; font-family:'Cairo',sans-serif; font-size:1.15rem; font-weight:900; border:none; border-radius:1rem; cursor:pointer; transition:all 0.3s; animation:ctaPulse 2.5s ease-in-out infinite; position:relative; overflow:hidden; }
+        .submit-btn::after { content:''; position:absolute; inset:0; background:linear-gradient(135deg,transparent 40%,rgba(255,255,255,0.08)); pointer-events:none; }
+        .submit-btn:hover { transform:translateY(-2px); background-position:100% 0; }
+
+        /* Inline mini-countdown in form */
+        .form-urgency {
+            background: rgba(239,68,68,0.08);
+            border: 1px solid rgba(239,68,68,0.2);
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #f87171;
+            margin-bottom: 0.5rem;
+        }
+
+        /* ======= FLOATING WHATSAPP ======= */
+        .wa-float {
+            position: fixed;
+            bottom: 1.5rem;
+            left: 1.5rem;
+            z-index: 9998;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .wa-btn {
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            background: #25d366;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 24px rgba(37,211,102,0.5);
+            animation: waPulse 2.5s ease-in-out infinite;
+            transition: transform 0.2s;
+            text-decoration: none;
+        }
+        .wa-btn:hover { transform: scale(1.1); }
+        @keyframes waPulse { 0%,100%{box-shadow:0 4px 24px rgba(37,211,102,0.5)} 50%{box-shadow:0 4px 40px rgba(37,211,102,0.8),0 0 0 12px rgba(37,211,102,0.08)} }
+        .wa-btn svg { width:30px; height:30px; fill:#fff; }
+        .wa-tooltip {
+            background: rgba(8,18,38,0.95);
+            border: 1px solid rgba(37,211,102,0.3);
+            color: #fff;
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 0.4rem 0.75rem;
+            border-radius: 0.5rem;
+            white-space: nowrap;
+            animation: fadeIn 0.4s ease;
+        }
+        @keyframes fadeIn { from{opacity:0;transform:translateX(-10px)} to{opacity:1;transform:translateX(0)} }
+
+        /* ======= LIVE BUYERS NOTIFICATION ======= */
+        .live-notif {
+            position: fixed;
+            bottom: 6rem;
+            right: 1.5rem;
+            z-index: 9997;
+            background: rgba(8,18,38,0.95);
+            border: 1px solid rgba(59,130,246,0.25);
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            font-size: 0.78rem;
+            max-width: 230px;
+            transform: translateX(300px);
+            transition: transform 0.5s ease;
+            backdrop-filter: blur(10px);
+        }
+        .live-notif.show { transform: translateX(0); }
+        .live-notif-top { display:flex; align-items:center; gap:0.5rem; margin-bottom:0.25rem; }
+        .live-dot { width:8px; height:8px; border-radius:50%; background:#22d3ee; animation:blink 1s step-end infinite; flex-shrink:0; }
+        .live-notif-name { font-weight:800; color:var(--text-primary); }
+        .live-notif-msg { color:var(--text-secondary); }
+
+        /* ======= POPUP / MODAL ======= */
+        .popup-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(2,5,16,0.85);
+            backdrop-filter: blur(8px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+        .popup-overlay.show { opacity: 1; pointer-events: all; }
+        .popup-box {
+            background: linear-gradient(145deg, #070f22, #0c1a3a);
+            border: 1px solid rgba(59,130,246,0.3);
+            border-radius: 1.5rem;
+            padding: 2.5rem 2rem;
+            max-width: 440px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+            transform: scale(0.85) translateY(20px);
+            transition: transform 0.4s ease;
+            box-shadow: 0 0 80px rgba(59,130,246,0.15);
+        }
+        .popup-overlay.show .popup-box { transform: scale(1) translateY(0); }
+        .popup-close {
+            position: absolute;
+            top: 1rem; left: 1rem;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-muted);
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+        }
+        .popup-close:hover { color: var(--text-primary); background: rgba(255,255,255,0.12); }
+        .popup-badge { display:inline-block; background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); color:#f87171; font-size:0.75rem; font-weight:800; padding:0.3rem 0.8rem; border-radius:999px; margin-bottom:1rem; }
+        .popup-title { font-size:1.6rem; font-weight:900; margin-bottom:0.5rem; }
+        .popup-price { font-size:2.5rem; font-weight:900; color:var(--accent-blue-bright); text-shadow:0 0 30px rgba(96,165,250,0.4); margin:1rem 0; }
+        .popup-sub { color:var(--text-secondary); font-size:0.88rem; margin-bottom:1.5rem; line-height:1.6; }
+        .popup-cta {
+            display:block; width:100%;
+            background:linear-gradient(135deg,#1d4ed8,#2563eb);
+            color:#fff; font-family:'Cairo',sans-serif;
+            font-size:1.05rem; font-weight:900;
+            padding:1rem; border-radius:0.875rem; border:none;
+            cursor:pointer; text-decoration:none;
+            animation:ctaPulse 2.5s ease-in-out infinite;
+        }
+        .popup-skip { color:var(--text-muted); font-size:0.78rem; margin-top:0.75rem; cursor:pointer; display:block; }
+        .popup-skip:hover { color:var(--text-secondary); }
+
+        /* ======= FOOTER ======= */
+        footer { position:relative; z-index:3; border-top:1px solid var(--border-subtle); padding:2.5rem 1rem; text-align:center; background:rgba(5,12,26,0.9); }
+        .footer-logo { height:40px; width:auto; margin:0 auto 1rem; opacity:0.5; }
+        .footer-text { color:var(--text-muted); font-size:0.8rem; }
+
+        /* TOAST */
+        #toast { position:fixed; bottom:2rem; left:50%; transform:translateX(-50%) translateY(120px); background:#16a34a; color:#fff; padding:1rem 2rem; border-radius:999px; font-weight:700; font-size:0.95rem; transition:transform 0.4s ease; z-index:9999; white-space:nowrap; }
+        #toast.show { transform:translateX(-50%) translateY(0); }
+
+        /* REVEAL */
+        .reveal { opacity:0; transform:translateY(30px); transition:opacity 0.7s ease,transform 0.7s ease; }
+        .reveal.visible { opacity:1; transform:translateY(0); }
+        .reveal-delay-1 { transition-delay:0.1s; }
+        .reveal-delay-2 { transition-delay:0.2s; }
+        .reveal-delay-3 { transition-delay:0.3s; }
+
+        @media (max-width:640px) {
+            .form-section { padding:2rem 1.25rem; }
+            .trust-inner { gap:1.2rem; }
+            .price-main { font-size:2.6rem; }
+            .thumbnails { grid-template-columns:repeat(3,1fr); }
+            .slider-arrow { width:38px; height:38px; }
+            .wa-float { bottom:1rem; left:1rem; }
+            .live-notif { right:1rem; max-width:200px; }
+            .countdown-bar { top:32px; }
+        }
+
+        </style>
+</head>
+<body>
+
+<!-- ====== POPUP (exit intent / timed) ====== -->
+<div class="popup-overlay" id="popup">
+    <div class="popup-box">
+        <button class="popup-close" onclick="closePopup()">✕</button>
+        <div class="popup-badge">⏰ عرض لوقت محدود</div>
+        <div style="font-size:2.5rem;margin-bottom:0.5rem">🎧</div>
+        <h2 class="popup-title">AirPods Pro 2<br><span style="color:var(--accent-blue-bright)">بسعر خاص!</span></h2>
+        <p class="popup-sub">باقي <strong id="popupStock" style="color:#f87171">7</strong> قطع بالسعر الحالي.<br>الدفع عند الاستلام · توصيل مجاني 🇲🇦</p>
+        <div class="popup-price">199 <span style="font-size:1.2rem;color:var(--text-muted)">بدل</span> <span style="font-size:1.4rem;text-decoration:line-through;color:var(--text-muted)">350 DH</span></div>
+        <a href="#order-form" class="popup-cta" onclick="closePopup()">أطلب الآن — الدفع عند الاستلام 🚀</a>
+        <span class="popup-skip" onclick="closePopup()">لا شكراً، سأدفع أكثر لاحقاً</span>
+    </div>
+</div>
+
+<!-- ====== LIVE NOTIFICATION ====== -->
+<div class="live-notif" id="liveNotif">
+    <div class="live-notif-top">
+        <div class="live-dot"></div>
+        <span class="live-notif-name" id="liveNotifName">يوسف من كازا</span>
+    </div>
+    <div class="live-notif-msg" id="liveNotifMsg">🛒 طلب للتو AirPods Pro 2</div>
+</div>
+
+<!-- ====== ANNOUNCEMENT BAR ====== -->
+<div class="announcement-bar">
+    🔥 عرض لوقت محدود
+    <span>·</span>
+    توصيل مجاني لجميع مدن المغرب
+    <span>·</span>
+    الدفع عند الاستلام
+    <span>·</span>
+    ضمان شهرين 🛡️
+</div>
+
+<!-- ====== COUNTDOWN BAR ====== -->
+<div class="countdown-bar">
+    <div class="countdown-inner">
+        <div class="countdown-label">ينتهي العرض خلال:</div>
+        <div class="time-units">
+            <div class="time-box"><span id="hours">00</span><small>ساعة</small></div>
+            <div class="time-sep">:</div>
+            <div class="time-box"><span id="minutes">00</span><small>دقيقة</small></div>
+            <div class="time-sep">:</div>
+            <div class="time-box"><span id="seconds">00</span><small>ثانية</small></div>
+        </div>
+    </div>
+</div>
+
+<div class="orbs"><div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div></div>
+
+<!-- ====== HERO ====== -->
+<section class="hero">
+    <video autoplay loop muted playsinline class="hero-video">
+        <source src="static/videos/hero_video.mp4" type="video/mp4">
+    </video>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+        <img src="/static/images/logo.png" alt="AM05 TECH" class="hero-logo">
+        <div class="hero-badge">🇺🇸 نسخة USA الأصلية · جودة مضمونة</div>
+        <h1 class="hero-title">
+            <span class="line1">AirPods Pro 2</span>
+            <span class="gradient-text">تجربة صوتية لا تُنسى</span>
+        </h1>
+        <p class="hero-sub">انغمس في عالم من الصوت النقي مع تكنولوجيا إلغاء الضوضاء الفعالة، وبطارية تدوم طويلاً، من <strong style="color:var(--text-primary)">AM05 TECH</strong> — الموثوقة في المغرب.</p>
+        <div class="price-block">
+            <span class="price-main">199 DH</span>
+            <span class="price-old">350 DH</span>
+            <span class="price-badge">🔥 وفر 43%</span>
+        </div>
+        <a href="#order-form" class="cta-btn">
+            أطلب الآن — الكمية محدودة
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="transform:scaleX(-1)"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+        </a>
+        <p class="delivery-note">🚚 توصيل مجاني في جميع أنحاء المغرب · الدفع عند الاستلام</p>
+
+        <!-- STOCK WIDGET -->
+        <div class="stock-widget">
+            <div class="stock-header">
+                <span class="stock-label">⚠️ الكمية على وشك النفاد!</span>
+                <span class="stock-count" id="stockCount">باقي 7 قطع فقط</span>
+            </div>
+            <div class="stock-bar-bg"><div class="stock-bar-fill"></div></div>
+            <div class="stock-buyers" id="buyersCount">👁️ 23 شخص يشوف هاد المنتج دابا</div>
+        </div>
+    </div>
+</section>
+
+<!-- ====== TRUST BAR ====== -->
+<div class="trust-bar">
+    <div class="trust-inner">
+        <div class="trust-item">✅ منتج أصلي 100%</div>
+        <div class="trust-item">🚚 توصيل 24 ساعة</div>
+        <div class="trust-item">💰 دفع عند الاستلام</div>
+        <div class="trust-item">🔄 ضمان شهرين</div>
+        <div class="trust-item">🛡️ واتساب مباشر</div>
+    </div>
+</div>
+
+<main>
+
+    <!-- GALLERY -->
+    <section class="gallery-section">
+        <div class="delivery-banner">
+            🚚 التوصيل مجانا في جميع مدن المغرب فـ 24 ساعة &nbsp;·&nbsp; ضمان شهرين 🛡️<br>
+            👉 للطلب المباشر على الواتساب: <a href="https://wa.me/212626379109">0626379109</a>
+        </div>
+        <div class="section-header reveal">
+            <span class="section-label">الصور الحقيقية</span>
+            <h2 class="section-title">شاهد المنتج بنفسك</h2>
+            <div class="section-divider"></div>
+        </div>
+        <div class="slider-wrapper reveal">
+            <div class="slider-track" id="sliderTrack">
+                <div class="slide"><img src="static/images/1.png" alt="AirPods Pro 2"><div class="slide-caption">AirPods Pro 2 — تصميم أنيق وفاخر</div></div>
+                <div class="slide"><img src="static/images/2.png" alt="AirPods Pro 2"><div class="slide-caption">علبة الشحن الذكية مع دعم MagSafe</div></div>
+                <div class="slide"><img src="static/images/3.png" alt="AirPods Pro 2"><div class="slide-caption">راحة استثنائية تناسب شكل الأذن</div></div>
+                <div class="slide"><img src="static/images/4.png" alt="AirPods Pro 2"><div class="slide-caption">تكنولوجيا إلغاء الضوضاء ANC الفعالة</div></div>
+                <div class="slide"><img src="static/images/5.png" alt="AirPods Pro 2"><div class="slide-caption">اتصال فوري ومستقر مع جميع الأجهزة</div></div>
+                <div class="slide"><img src="static/images/6.png" alt="AirPods Pro 2"><div class="slide-caption">جودة صوت HiFi — نسخة USA الأصلية 🇺🇸</div></div>
+            </div>
+            <div class="slide-counter" id="slideCounter">1 / 6</div>
+            <button class="slider-arrow slider-arrow-prev" onclick="changeSlide(-1)"><svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg></button>
+            <button class="slider-arrow slider-arrow-next" onclick="changeSlide(1)"><svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></button>
+        </div>
+        <div class="slider-dots">
+            <button class="dot active" onclick="goToSlide(0)"></button>
+            <button class="dot" onclick="goToSlide(1)"></button>
+            <button class="dot" onclick="goToSlide(2)"></button>
+            <button class="dot" onclick="goToSlide(3)"></button>
+            <button class="dot" onclick="goToSlide(4)"></button>
+            <button class="dot" onclick="goToSlide(5)"></button>
+        </div>
+        <div class="thumbnails reveal">
+            <div class="thumb active" onclick="goToSlide(0)"><img src="static/images/1.png" alt="1"></div>
+            <div class="thumb" onclick="goToSlide(1)"><img src="static/images/2.png" alt="2"></div>
+            <div class="thumb" onclick="goToSlide(2)"><img src="static/images/3.png" alt="3"></div>
+            <div class="thumb" onclick="goToSlide(3)"><img src="static/images/4.png" alt="4"></div>
+            <div class="thumb" onclick="goToSlide(4)"><img src="static/images/5.png" alt="5"></div>
+            <div class="thumb" onclick="goToSlide(5)"><img src="static/images/6.png" alt="6"></div>
+        </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="content-section">
+        <div class="section-header reveal"><span class="section-label">لماذا نحن؟</span><h2 class="section-title">مزايا تجعل الفرق</h2><div class="section-divider"></div></div>
+        <div class="features-grid">
+            <div class="feature-card glass reveal reveal-delay-1"><div class="feature-icon-wrap">🔊</div><h3 class="feature-title">صوت HiFi نقي</h3><p class="feature-desc">جودة صوتية استثنائية بعمق في الباص ووضوح تام في الترددات العالية، بفضل تقنية نسخة USA الأصلية.</p></div>
+            <div class="feature-card glass highlight reveal reveal-delay-2"><div class="feature-icon-wrap">🔇</div><h3 class="feature-title">إلغاء الضوضاء ANC</h3><p class="feature-desc">تقنية إلغاء الضوضاء النشطة تعزلك تماماً عن ضجيج العالم الخارجي لتجربة استماع خالصة.</p></div>
+            <div class="feature-card glass reveal reveal-delay-3"><div class="feature-icon-wrap">🔋</div><h3 class="feature-title">بطارية 24 ساعة</h3><p class="feature-desc">استمتع بموسيقاك طوال اليوم مع علبة الشحن — تدعم Pop-up، GPS، وشحن لاسلكي.</p></div>
+            <div class="feature-card glass reveal reveal-delay-1"><div class="feature-icon-wrap">🎙️</div><h3 class="feature-title">ميكروفون احترافي</h3><p class="feature-desc">مكالمات هاتفية بوضوح كريستالي بفضل نظام الميكروفون المتعدد وإلغاء الضوضاء في المكالمات.</p></div>
+            <div class="feature-card glass reveal reveal-delay-2"><div class="feature-icon-wrap">⚡</div><h3 class="feature-title">اتصال فوري</h3><p class="feature-desc">اتصال Bluetooth مستقر وسريع مع جميع أجهزة Apple وAndroid بدون انقطاع.</p></div>
+            <div class="feature-card glass reveal reveal-delay-3"><div class="feature-icon-wrap">💎</div><h3 class="feature-title">تصميم فاخر</h3><p class="feature-desc">جسم أنيق مريح يناسب شكل الأذن لساعات طويلة، متوفر باللون الأبيض الكلاسيكي الأيقوني.</p></div>
+        </div>
+    </section>
+
+    <!-- SPECS -->
+    <section class="content-section">
+        <div class="section-header reveal"><span class="section-label">المواصفات</span><h2 class="section-title">تفاصيل تقنية</h2><div class="section-divider"></div></div>
+        <div class="glass reveal" style="border-radius:1.5rem;overflow:hidden;">
+            <table class="specs-table">
+                <tr><td>الاتصال</td><td>Bluetooth 5.3</td></tr>
+                <tr><td>إلغاء الضوضاء</td><td>ANC نشط + Transparency Mode</td></tr>
+                <tr><td>عمر البطارية</td><td>6 ساعات (30 مع العلبة)</td></tr>
+                <tr><td>مقاومة الماء</td><td>IPX4</td></tr>
+                <tr><td>الصوت</td><td>Spatial Audio + Head Tracking</td></tr>
+                <tr><td>الشحن</td><td>Lightning / MagSafe / لاسلكي</td></tr>
+                <tr><td>التحكم</td><td>Force Sensor + Siri</td></tr>
+                <tr><td>المنشأ</td><td>🇺🇸 نسخة USA الأصلية</td></tr>
+            </table>
+        </div>
+    </section>
+
+    <!-- REVIEWS -->
+    <section class="content-section">
+        <div class="section-header reveal"><span class="section-label">آراء العملاء</span><h2 class="section-title">ماذا قالوا عنا؟</h2><div class="section-divider"></div></div>
+        <div class="reviews-grid">
+            <div class="review-card glass reveal reveal-delay-1"><div class="stars">★★★★★</div><p class="review-text">"الجودة مذهلة! الصوت نقي والـ ANC تشتغل بشكل ممتاز. التوصيل وصل في يومين فقط."</p><div class="reviewer"><div class="reviewer-avatar">ي</div><div><div class="reviewer-name">يوسف المراكشي</div><div class="reviewer-city">مراكش</div></div></div></div>
+            <div class="review-card glass reveal reveal-delay-2"><div class="stars">★★★★★</div><p class="review-text">"شريت جوج قطع لي ولخويا، وماشي أحسن شي. التعامل محترم والسماعات أصلية 100%."</p><div class="reviewer"><div class="reviewer-avatar">س</div><div><div class="reviewer-name">سمية الحسيني</div><div class="reviewer-city">الدار البيضاء</div></div></div></div>
+            <div class="review-card glass reveal reveal-delay-3"><div class="stars">★★★★★</div><p class="review-text">"خدمة ممتازة، الدفع عند الاستلام أراحني. السماعات رائعة والمكالمات واضحة جداً."</p><div class="reviewer"><div class="reviewer-avatar">أ</div><div><div class="reviewer-name">أيمن بنعلي</div><div class="reviewer-city">فاس</div></div></div></div>
+        </div>
+    </section>
+
+    <!-- ORDER FORM -->
+    <section id="order-form">
+        <div class="section-header reveal"><span class="section-label">اطلب الآن</span><h2 class="section-title">أكمل طلبك</h2><div class="section-divider"></div></div>
+        <div class="form-section glass reveal">
+            <h3 class="form-title" style="text-align:center">تأكيد الطلب من <span style="color:var(--accent-blue-bright)">AM05 TECH</span></h3>
+            <p class="form-sub" style="text-align:center">أدخل بياناتك وسنتصل بك فوراً</p>
+            <div style="display:flex;flex-direction:column;gap:1rem;">
+                <div class="form-urgency">⚡ باقي <strong id="formStock">7</strong> قطع بهذا السعر — اطلب قبل فوات الأوان!</div>
+                <input type="text" id="name" class="form-input" placeholder="الاسم الكامل" autocomplete="name">
+                <input type="tel" id="phone" class="form-input" placeholder="رقم الهاتف (06XXXXXXXX)" autocomplete="tel">
+                <input type="text" id="city" class="form-input" placeholder="المدينة" autocomplete="address-level2">
+                <input type="text" id="address" class="form-input" placeholder="العنوان التفصيلي (الحي، الشارع...)" autocomplete="street-address">
+                <div style="display:flex;flex-direction:column;gap:0.6rem;margin-top:0.5rem;">
+                    <span style="font-size:0.85rem;color:var(--text-secondary);font-weight:700;margin-bottom:0.25rem;">اختر العرض:</span>
+                    <input type="radio" name="offer" id="offer1" value="1pc" class="offer-radio" checked>
+                    <label for="offer1" class="offer-label">
+                        <div class="offer-dot"></div>
+                        <span class="offer-text">قطعة واحدة — <strong style="color:var(--accent-blue-bright)">199 DH</strong></span>
+                    </label>
+                    <input type="radio" name="offer" id="offer2" value="2pcs" class="offer-radio">
+                    <label for="offer2" class="offer-label">
+                        <div class="offer-dot"></div>
+                        <span class="offer-text">قطعتان — <strong style="color:var(--accent-blue-bright)">349 DH</strong> <span style="font-size:0.8rem;color:var(--text-muted)">(توفير 50 درهم)</span></span>
+                        <span class="offer-popular">الأكثر طلباً 🔥</span>
+                    </label>
+                </div>
+                <button onclick="submitOrderFlask(event)" class="submit-btn" style="margin-top:0.5rem;">تأكيد الطلب — الدفع عند الاستلام 🚀</button>
+                <!-- Hidden form for Flask POST -->
+                <form id="flaskForm" action="/order" method="POST" style="display:none">
+                    <input type="hidden" id="f_name"    name="name">
+                    <input type="hidden" id="f_phone"   name="phone">
+                    <input type="hidden" id="f_city"    name="city">
+                    <input type="hidden" id="f_address" name="address">
+                    <input type="hidden" id="f_offer"   name="offer">
+                </form>
+                <p style="text-align:center;font-size:0.78rem;color:var(--text-muted);margin-top:0.25rem;">🔒 بياناتك آمنة · لا يلزم إنشاء حساب</p>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<footer>
+    <img src="/static/images/logo.png" alt="AM05 TECH" class="footer-logo">
+    <p class="footer-text">AM05 TECH &copy; 2026 — جودة نثق بها. صنع بـ ❤️ للمغرب.</p>
+</footer>
+
+<!-- TOAST -->
+<div id="toast">✅ جاري فتح الواتساب...</div>
+
+<!-- FLOATING WHATSAPP -->
+<div class="wa-float">
+    <a href="https://wa.me/212626379109" target="_blank" class="wa-btn" aria-label="واتساب">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+    </a>
+    <div class="wa-tooltip">اطلب عبر واتساب</div>
+</div>
+
+<script>
+    // ======= COUNTDOWN =======
+    const endTime = new Date();
+    endTime.setHours(endTime.getHours() + 11);
+    endTime.setMinutes(endTime.getMinutes() + 47);
+    endTime.setSeconds(endTime.getSeconds() + 33);
+
+    function updateCountdown() {
+        const now = new Date();
+        const diff = Math.max(0, endTime - now);
+        const h = Math.floor(diff / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        document.getElementById('hours').textContent   = String(h).padStart(2,'0');
+        document.getElementById('minutes').textContent = String(m).padStart(2,'0');
+        document.getElementById('seconds').textContent = String(s).padStart(2,'0');
+    }
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
+
+    // ======= FAKE STOCK (decreasing slowly) =======
+    let stockLeft = 7;
+    function decreaseStock() {
+        if (stockLeft > 2) {
+            const decrease = Math.random() < 0.4 ? 1 : 0;
+            stockLeft = Math.max(2, stockLeft - decrease);
+        }
+        document.getElementById('stockCount').textContent = `باقي ${stockLeft} قطع فقط`;
+        document.getElementById('formStock').textContent   = stockLeft;
+        document.getElementById('popupStock').textContent  = stockLeft;
+        setTimeout(decreaseStock, Math.random() * 40000 + 20000);
+    }
+    setTimeout(decreaseStock, 25000);
+
+    // ======= FAKE BUYERS COUNT =======
+    function updateBuyers() {
+        const count = Math.floor(Math.random() * 15) + 18;
+        document.getElementById('buyersCount').textContent = `👁️ ${count} شخص يشوف هاد المنتج دابا`;
+        setTimeout(updateBuyers, Math.random() * 8000 + 5000);
+    }
+    setTimeout(updateBuyers, 6000);
+
+    // ======= POPUP =======
+    let popupShown = false;
+    function showPopup() {
+        if (popupShown) return;
+        popupShown = true;
+        document.getElementById('popup').classList.add('show');
+    }
+    function closePopup() {
+        document.getElementById('popup').classList.remove('show');
+    }
+    // Show after 8 seconds
+    setTimeout(showPopup, 8000);
+    // Also show on exit intent (desktop)
+    document.addEventListener('mouseleave', e => {
+        if (e.clientY < 5) showPopup();
+    });
+
+    // ======= LIVE NOTIFICATIONS =======
+    const notifs = [
+        { name: 'يوسف من كازا', msg: '🛒 طلب للتو AirPods Pro 2' },
+        { name: 'فاطمة من الرباط', msg: '🛒 طلبت عرض الجوج قطع' },
+        { name: 'أيمن من فاس', msg: '🛒 طلب للتو AirPods Pro 2' },
+        { name: 'سارة من أكادير', msg: '⭐ قيمت المنتج بـ 5 نجوم' },
+        { name: 'محمد من طنجة', msg: '🛒 طلب للتو AirPods Pro 2' },
+        { name: 'خديجة من مراكش', msg: '🛒 طلبت عرض الجوج قطع' },
+        { name: 'إبراهيم من وجدة', msg: '🛒 طلب للتو AirPods Pro 2' },
+        { name: 'نادية من تطوان', msg: '⭐ قيمت المنتج بـ 5 نجوم' },
+    ];
+    let notifIdx = 0;
+    function showNotif() {
+        const n = notifs[notifIdx % notifs.length];
+        document.getElementById('liveNotifName').textContent = n.name;
+        document.getElementById('liveNotifMsg').textContent  = n.msg;
+        const el = document.getElementById('liveNotif');
+        el.classList.add('show');
+        setTimeout(() => el.classList.remove('show'), 4000);
+        notifIdx++;
+        setTimeout(showNotif, Math.random() * 12000 + 8000);
+    }
+    setTimeout(showNotif, 4000);
+
+    // ======= SLIDER =======
+    const TOTAL = 6;
+    let current = 0, autoTimer = null;
+    const track   = document.getElementById('sliderTrack');
+    const dots    = document.querySelectorAll('.dot');
+    const thumbs  = document.querySelectorAll('.thumb');
+    const counter = document.getElementById('slideCounter');
+
+    function goToSlide(n) {
+        current = (n + TOTAL) % TOTAL;
+        track.style.transform = `translateX(${current * 100}%)`;
+        dots.forEach((d,i)  => d.classList.toggle('active', i === current));
+        thumbs.forEach((t,i) => t.classList.toggle('active', i === current));
+        counter.textContent = `${current + 1} / ${TOTAL}`;
+        resetAuto();
+    }
+    function changeSlide(dir) { goToSlide(current + dir); }
+    function resetAuto() {
+        clearInterval(autoTimer);
+        autoTimer = setInterval(() => goToSlide(current + 1), 4500);
+    }
+    document.addEventListener('keydown', e => { if(e.key==='ArrowLeft') changeSlide(1); if(e.key==='ArrowRight') changeSlide(-1); });
+    let touchStartX = 0;
+    track.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive:true });
+    track.addEventListener('touchend',   e => { const dx = e.changedTouches[0].clientX - touchStartX; if(Math.abs(dx)>40) changeSlide(dx>0?-1:1); });
+    resetAuto();
+
+    // ======= SCROLL REVEAL =======
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('visible'); observer.unobserve(e.target); } });
+    }, { threshold:0.1 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    // ======= ORDER (Flask POST → receipt page) =======
+    function submitOrderFlask(e) {
+        if (e) e.preventDefault();
+        const name    = document.getElementById('name').value.trim();
+        const phone   = document.getElementById('phone').value.trim();
+        const city    = document.getElementById('city').value.trim();
+        const address = document.getElementById('address').value.trim();
+        const offer   = document.querySelector('input[name="offer"]:checked').value;
+        if (!name||!phone||!city||!address) { alert('⚠️ الرجاء ملء جميع الحقول قبل المتابعة.'); return; }
+        if (!/^0[67]\d{8}$/.test(phone)) { alert('⚠️ الرجاء إدخال رقم هاتف مغربي صحيح (مثال: 0612345678).'); return; }
+        document.getElementById('f_name').value    = name;
+        document.getElementById('f_phone').value   = phone;
+        document.getElementById('f_city').value    = city;
+        document.getElementById('f_address').value = address;
+        document.getElementById('f_offer').value   = offer;
+        document.getElementById('flaskForm').submit();
+    }
+    function submitOrder() { submitOrderFlask(null); }
+</script>
+
+<script>
+
+</script>
+
+
+
+</body>
+</html>
